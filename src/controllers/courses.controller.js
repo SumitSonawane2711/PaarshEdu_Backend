@@ -107,7 +107,6 @@ export const getCoursesByCategory = async (req, res) => {
 export const createCategory = asyncHandler(async (req,res)=>{
 
   const {description,name} = req.body;
-  console.log(name,description);
   
 
      //Validate required fields
@@ -176,7 +175,6 @@ if(!updatedCategory){
 //Delete Category by Id
 export const deleteCategoryById = asyncHandler(async (req,res)=>{
   const { categoryId } = req.params; // Adjusted to match the route parameter
-  console.log("categoryId :",categoryId)
   
   // Find the course by ID
   const category = await Category.findByPk(categoryId);
@@ -338,7 +336,6 @@ export const deleteInstructor = asyncHandler(async (req, res) => {
 export const updateInstructor = asyncHandler(async (req, res) => {
   
   const {id,name,email} = req.body;
-  console.log(req.body);
   
 
   // Find the Instructor by ID
@@ -348,7 +345,6 @@ export const updateInstructor = asyncHandler(async (req, res) => {
   if (!instructor) {
     return res.status(404).json({ message: 'instructor not found' });
   }
-   console.log("instructor : ",instructor);
    
   // Update the Instructor
   const updatedInstructor = await instructor.update({
