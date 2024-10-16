@@ -9,7 +9,7 @@ dotenv.config();
 
 // Create a new instance of Sequelize
 const sequelize = new Sequelize(
-  process.env.DB_NAME, // Database name
+  DB_NAME, // Database name
   process.env.DB_USER, // Username
   process.env.DB_PASSWORD, // Password
   {
