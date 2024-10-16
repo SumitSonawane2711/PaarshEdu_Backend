@@ -2,10 +2,19 @@
 import { Sequelize } from 'sequelize';
 import { DB_NAME } from '../constants.js';
 
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
 // Create a new instance of Sequelize
-const sequelize = new Sequelize("paarsh", "root", "pass123", {
-  host: "localhost",
-  dialect: 'mysql'
+const sequelize = new Sequelize(
+  process.env.DB_NAME, // Database name
+  process.env.DB_USER, // Username
+  process.env.DB_PASSWORD, // Password
+  {
+    host: process.env.DB_HOST || 'localhost',
+    dialect: 'mysql'
 });
 
 // Connect to the database
