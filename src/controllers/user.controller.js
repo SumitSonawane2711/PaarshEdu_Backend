@@ -1,16 +1,19 @@
 import { User } from "../models/user.model.js"
 import bcrypt from 'bcryptjs'
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 //get all users
 export const users = async (req, res) => {
-    try {
-      const users = await User.findAll(); // Simple query without associations
-      res.status(200).json(users);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      res.status(500).json({ error: 'An error occurred while fetching users.' });
+    const users = await User.findAll();
+
+    if(!users){
+      throw new ApiError(500,"Something went wrong while fetching users")
     }
+    return res.status(200).json(
+      new ApiResponse(200,'User fetch successfully',users)
+    );
   }
 
 // Register User
