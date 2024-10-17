@@ -3,7 +3,7 @@ import { sequelize } from '../db/index.js';
 
 
 //define User model
-const User = sequelize.define('User', {
+const User = sequelize.define('users', {
     name: {
       type: DataTypes.STRING,
       allowNull: false
