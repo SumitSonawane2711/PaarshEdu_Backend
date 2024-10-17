@@ -156,8 +156,8 @@ export const updateCategory = asyncHandler(async (req, res) => {
 
   // Update the category
   const updatedCategory = await category.update({
-    name,
-    description,
+    name :name || category.name,
+    description: description || category.description,
 });
 
 if(!updatedCategory){
@@ -201,16 +201,6 @@ export const updateCourse = asyncHandler(async (req, res) => {
   
   const {id,title,description,price,instructorId,categoryId,duration,language,level,type,longdescription} = req.body;
 
-  let courseImagePath = null;
-
-  // Check if a new course image is provided
-  if (req.files && Array.isArray(req.files.courseImage) && req.files.courseImage.length > 0) {
-    const CourseLocalPath = req.files.courseImage[0].path;
-    
-    // Upload the image to Cloudinary
-    courseImagePath = await uploadOnCloudinary(CourseLocalPath);
-  }
-
   // Find the course by ID
   const course = await Course.findByPk(id);
 
@@ -219,13 +209,24 @@ export const updateCourse = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Course not found' });
   }
 
+  let courseImagePath = null;
+
+  // Check if a new course image is provided
+  if (req.files && Array.isArray(req.files.courseImage) && req.files.courseImage.length > 0) {
+    const CourseLocalPath = req.files.courseImage[0].path;
+    
+    // Upload the image to Cloudinary
+    uploadedImage  = await uploadOnCloudinary(CourseLocalPath);
+    courseImagePath = uploadedImage.url
+  }
+
   // Update the course
   const updatedCourse = await course.update({
     title,
     description,
     price,
     instructorId,
-    imageUrl : courseImagePath.url,
+    imageUrl : courseImagePath || course.imageUrl,
     categoryId,
     duration,
     language,
