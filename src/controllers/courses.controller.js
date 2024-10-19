@@ -20,7 +20,7 @@ export const createCourse = async (req,res) => {
       throw new ApiError(400, 'Course images are required');
  }
 
- let CourseLocalPath;
+ let CourseLocalPath ;
  if(req.files && Array.isArray(req.files.courseImage )&& req.files.courseImage.length > 0){
   CourseLocalPath = req.files.courseImage[0].path
  }
@@ -29,7 +29,16 @@ export const createCourse = async (req,res) => {
      throw new ApiError(400, "course file is required")
  }
 
- const courseImagePath = await uploadOnCloudinary(CourseLocalPath)
+ const uploadedImage = await uploadOnCloudinary(CourseLocalPath)
+
+ // Check if the upload was successful
+ if (uploadedImage && uploadedImage.url) {
+  courseImagePath = uploadedImage.url;
+} else {
+  // If the upload failed, handle the error
+  return res.status(500).json({ message: 'Image upload to Cloudinary failed' });
+}
+
 
     const course = await Course.create({
       title,
@@ -49,13 +58,13 @@ export const createCourse = async (req,res) => {
   if(!course) {
     throw new ApiError(500, "Something went wrong while creating the course")
 }
-
 // 9.return resposne
 return res.status(201).json(
-    new ApiResponse(200,course,"course created Successfully")
+  new ApiResponse(200,course,"course created Successfully")
 )
-  
+
 }
+
 
 // Fetch all Courses
 export const courses = async (req, res) => {
@@ -216,8 +225,14 @@ export const updateCourse = asyncHandler(async (req, res) => {
     const CourseLocalPath = req.files.courseImage[0].path;
     
     // Upload the image to Cloudinary
-    uploadedImage  = await uploadOnCloudinary(CourseLocalPath);
-    courseImagePath = uploadedImage.url
+    const uploadedImage  = await uploadOnCloudinary(CourseLocalPath);
+      // Check if the upload was successful
+  if (uploadedImage && uploadedImage.url) {
+    courseImagePath = uploadedImage.url;
+  } else {
+    throw new ApiError(500, "Image upload failed");
+  }
+
   }
 
   // Update the course

@@ -9,7 +9,7 @@ const LOCALstorage = multer.diskStorage({
      }
 })
 
-
 export const upload = multer({
      storage: LOCALstorage
 })
+
