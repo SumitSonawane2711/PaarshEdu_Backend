@@ -31,12 +31,8 @@ export const createCourse = async (req,res) => {
 
  const uploadedImage = await uploadOnCloudinary(CourseLocalPath)
 
- // Check if the upload was successful
- if (uploadedImage && uploadedImage.url) {
-  courseImagePath = uploadedImage.url;
-} else {
-  // If the upload failed, handle the error
-  return res.status(500).json({ message: 'Image upload to Cloudinary failed' });
+ if(!uploadedImage){
+  throw new ApiError(400, "Avatar file is required")
 }
 
 
@@ -45,7 +41,7 @@ export const createCourse = async (req,res) => {
       description,
       price,
       instructorId,
-      imageUrl : courseImagePath.url,
+      imageUrl : uploadedImage.url,
       categoryId,
       duration,
       language,
@@ -218,22 +214,20 @@ export const updateCourse = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Course not found' });
   }
 
-  let courseImagePath = null;
+  let CourseLocalPath ;
+ if(req.files && Array.isArray(req.files.courseImage )&& req.files.courseImage.length > 0){
+  CourseLocalPath = req.files.courseImage[0].path
+ }
+ 
+ if(!CourseLocalPath){
+     throw new ApiError(400, "course file is required")
+ }
 
-  // Check if a new course image is provided
-  if (req.files && Array.isArray(req.files.courseImage) && req.files.courseImage.length > 0) {
-    const CourseLocalPath = req.files.courseImage[0].path;
-    
-    // Upload the image to Cloudinary
-    const uploadedImage  = await uploadOnCloudinary(CourseLocalPath);
-      // Check if the upload was successful
-  if (uploadedImage && uploadedImage.url) {
-    courseImagePath = uploadedImage.url;
-  } else {
-    throw new ApiError(500, "Image upload failed");
-  }
+ const uploadedImage = await uploadOnCloudinary(CourseLocalPath)
 
-  }
+ if(!uploadedImage){
+  throw new ApiError(400, "Avatar file is required")
+}
 
   // Update the course
   const updatedCourse = await course.update({
@@ -241,7 +235,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     description,
     price,
     instructorId,
-    imageUrl : courseImagePath || course.imageUrl,
+    imageUrl : uploadedImage.url || course.imageUrl,
     categoryId,
     duration,
     language,
