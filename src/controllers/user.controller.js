@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 //get all users
-export const users = async (req, res) => {
+export const users = asyncHandler( async (req, res) => {
     const users = await User.findAll();
 
     if(!users){
@@ -14,17 +14,16 @@ export const users = async (req, res) => {
     return res.status(200).json(
       new ApiResponse(200,'User fetch successfully',users)
     );
-  }
+  })
 
 // Register User
-export const register = async (req, res) => {
+export const register =asyncHandler( async (req, res) => {
     const { name, email, phone, password } = req.body;
 
-    try {
         // Check if the user already exists
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+          throw new ApiError(409,"user with email or username already exists")
         }
 
         // Hash the password
@@ -38,34 +37,43 @@ export const register = async (req, res) => {
             password: hashedPassword,
         });
 
-        res.status(201).json({ message: 'User registered successfully', user });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
+        if(!user) {
+          throw new ApiError(500, "Something went wrong while registering the user")
+      }
+        
+        //return resposne
+        return res.status(201).json(
+        new ApiResponse(200,"User registered Successfully",user)
+        )    
+})
 
 // Login User
-export const login = async (req, res) => {
+export const login =asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    try {
+    if(!(email || password)) {
+      throw new ApiError(400, "username or password is required")
+    }
+
         // Find the user by email
         const user = await User.findOne({ where: { email } });
+
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+        throw new ApiError(404, "User does not exist")
         }
 
         // Check if the password matches
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+          throw new ApiError(401, "Invalid user credentials")
         }
 
-        res.status(200).json({ message: 'Login successful', user });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
+         return res
+          .status(200)
+          .json(new ApiResponse(200,"User Logged In Successfully",user))
+    
+})
 
 //delete User
 export const deleteUser = asyncHandler(async (req, res) => {
@@ -117,7 +125,7 @@ export const updateUser = asyncHandler(async (req, res) => {
   
     // Return the response
     return res.status(200).json(
-      new ApiResponse(200,updatedUser,"User updated Successfully")
+      new ApiResponse(200,"User updated Successfully",updatedUser)
     );
   
   });  
