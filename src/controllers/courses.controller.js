@@ -6,7 +6,7 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 // create a courses
-export const createCourse = async (req,res) => {
+export const createCourse =asyncHandler( async (req,res) => {
   
     const {title,description,price,instructorId,categoryId,duration,language,level,type,longdescription} = req.body;
 
@@ -59,11 +59,11 @@ return res.status(201).json(
   new ApiResponse(200,course,"course created Successfully")
 )
 
-}
+})
 
 
 // Fetch all Courses
-export const courses = async (req, res) => {
+export const courses =asyncHandler( async (req, res) => {
   const courses = await Course.findAll();
 
   if(!courses) {
@@ -74,7 +74,7 @@ export const courses = async (req, res) => {
                courses)
      );
  
-}
+})
 
 //fetch course by id
 export const getCourseById = asyncHandler(async(req,res)=>{
@@ -95,7 +95,7 @@ export const getCourseById = asyncHandler(async(req,res)=>{
 })
 
 // Fetch courses by category
-export const getCoursesByCategory = async (req, res) => {
+export const getCoursesByCategory =asyncHandler( async (req, res) => {
   const { categoryId } = req.params;
   try {
     const courses = await Course.findAll({
@@ -106,7 +106,7 @@ export const getCoursesByCategory = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch courses', error: error.message });
   }
-};
+})
 
 //create a category
 export const createCategory = asyncHandler(async (req,res)=>{
@@ -137,14 +137,14 @@ export const createCategory = asyncHandler(async (req,res)=>{
 )
 
 // Fetch all categories
-export const getAllCategories = async (req, res) => {
+export const getAllCategories = asyncHandler( async (req, res) => {
   try {
     const categories = await Category.findAll();
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch categories', error: error.message });
   }
-};
+})
 
 //Update category
 export const updateCategory = asyncHandler(async (req, res) => {
@@ -219,29 +219,22 @@ export const updateCourse = asyncHandler(async (req, res) => {
   CourseLocalPath = req.files.courseImage[0].path
  }
  
- if(!CourseLocalPath){
-     throw new ApiError(400, "course file is required")
- }
 
  const uploadedImage = await uploadOnCloudinary(CourseLocalPath)
 
- if(!uploadedImage){
-  throw new ApiError(400, "Avatar file is required")
-}
-
   // Update the course
   const updatedCourse = await course.update({
-    title,
-    description,
-    price,
-    instructorId,
-    imageUrl : uploadedImage.url || course.imageUrl,
-    categoryId,
-    duration,
-    language,
-    level,
-    type,
-    longdescription
+    ...(title && { title }),
+    ...(description && { description }),
+    ...(price && { price }),
+    ...(instructorId && { instructorId }),
+    ...(categoryId && { categoryId }),
+    ...(duration && { duration }),
+    ...(language && { language }),
+    ...(level && { level }),
+    ...(type && { type }),
+    ...(longdescription && { longdescription }),
+    ...(uploadedImage?.url && { imageUrl: uploadedImage.url }),
 });
 
 if(!updatedCourse){
@@ -279,7 +272,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
 });
 
 //get instructor
-export const getInstructor = async (req, res) => {
+export const getInstructor = asyncHandler( async (req, res) => {
   const instructor = await Instructor.findAll();
 
   if(!instructor) {
@@ -290,7 +283,7 @@ export const getInstructor = async (req, res) => {
                instructor)
      );
   
-}
+})
 
 // add instructor
 export const createInstructor = asyncHandler(async (req,res)=>{
